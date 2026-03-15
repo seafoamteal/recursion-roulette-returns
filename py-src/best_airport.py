@@ -3,7 +3,7 @@ from polars.functions import date
 import time
 import polars as pl
 import argparse
-
+import csv
 
 def main():
     pl.Config.set_tbl_rows(20)
@@ -100,9 +100,19 @@ def run_query(origin: str, dest: str):
 
     end = time.monotonic()
 
-    print(lf)
-    print(f"Time taken: {end - start}s")
+    best_flights_output = f"data/output/best_flights_{origin}_{dest}"
+    time_taken_output = "data/output/best_flights_time_taken"
 
+    #The top 20 best flights for this route go into their own file
+    with open(best_flights_output, "w", newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerows(lf.iter_rows())
+        writer.writerow([end - start])
+
+    #Appending the time taken to best_flights_time_taken
+    with open(time_taken_output, "a", newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow((origin, dest, end - start))
 
 if __name__ == "__main__":
     main()
