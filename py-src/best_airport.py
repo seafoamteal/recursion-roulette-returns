@@ -35,17 +35,14 @@ def run_query(origin: str, dest: str):
     # airlines often reuse flight numbers between different routes. This means
     # we can't simply check whether a flight has ever flown the route we want.
     # We need to check if it's the _last route it has served_. Of course, there's
-    # no way to know for sure without looking up current filght schedules, but
+    # no way to know for sure without looking up current flight schedules, but
     # this is a good enough heuristic.
     base = pl.scan_parquet("data/fd.parquet").with_columns(
         # A route is bidirectional. It does not suffice to check if the last trip
         # a flight has taken is ORIG => DEST because it might also have been
         # DEST => ORIG, so we check for both.
         route=(
-            pl.when(
-                ((pl.col("Origin") == origin) & (pl.col("Dest") == dest))
-                | ((pl.col("Dest") == origin) & (pl.col("Origin") == dest))
-            )
+            pl.when(((pl.col("Origin") == origin) & (pl.col("Dest") == dest)))
             .then(True)
             .otherwise(False)
         ).alias("route"),
@@ -85,21 +82,13 @@ def run_query(origin: str, dest: str):
         .agg(
             pl.col("ArrDelay").mean().alias("avg_delay"),
             pl.len().alias("number_of_flights"),
-            # We know this flight number has flown this route recently,
-            # but sometimes flights only serve one half of a bidirectional route.
-            # e.g. DL827 used to fly both LAX => ATL and ATL => LAX, but now
-            # it only does ATL => LAX. We don't want to include it in our final
-            # results, so we also make sure that it has recently flown the exact
-            # route + direction we are looking for.
-            pl.col("Date").max().alias("latest_flight"),
         )
         .filter(
-            (pl.col("latest_flight").ge(date(2025, 1, 1)))
             # The dataset also includes private jets and other non-commercial
             # planes. We don't want them in our results, so a good heuristic
             # to filter them is by filtering out flights that have flown this
             # route quite infrequently.
-            & (pl.col("number_of_flights").ge(10))
+            pl.col("number_of_flights").ge(10)
         )
         .sort(pl.col("avg_delay"))
         .limit(20)
