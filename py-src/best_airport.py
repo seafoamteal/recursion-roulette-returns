@@ -1,9 +1,14 @@
+import os
+os.environ["POLARS_MAX_THREADS"] = "1"
+
 from polars.lazyframe.in_process import InProcessQuery
 from polars.functions import date
 import time
 import polars as pl
 import argparse
 import csv
+import psutil
+POLARS_MAX_THREADS=1
 
 def main():
     pl.Config.set_tbl_rows(20)
@@ -99,6 +104,15 @@ def run_query(origin: str, dest: str):
         lf = lf.fetch_blocking()
 
     end = time.monotonic()
+    
+    vmem = psutil.virtual_memory()
+    swmem = psutil.swap_memory()
+    cpu = psutil.cpu_percent(percpu=True)
+
+    print(f"Virtual Memory: {vmem.percent}% used")
+    print(f"Swap Memory: {swmem.percent}% used")
+    print(f"CPU Usages: {cpu}%")
+
 
     best_flights_output = f"data/output/best_flights_{origin}_{dest}"
     time_taken_output = "data/output/best_flights_time_taken"
