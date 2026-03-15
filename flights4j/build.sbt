@@ -28,7 +28,7 @@ lazy val root = (project in file(".")).settings(
   Test / parallelExecution := false,
   fork := true,
 
-  coverageHighlighting := true,
+  //coverageHighlighting := true,
 
   libraryDependencies ++= Seq(
     "org.apache.spark" %% "spark-streaming" % "3.3.0" % "provided",
