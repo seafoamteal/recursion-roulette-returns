@@ -1,9 +1,14 @@
+import os
+os.environ["POLARS_MAX_THREADS"] = "1"
+
 from polars.lazyframe.in_process import InProcessQuery
 from polars.functions import date
 import time
 import polars as pl
 import argparse
-
+import csv
+import psutil
+POLARS_MAX_THREADS=1
 
 def main():
     pl.Config.set_tbl_rows(20)
@@ -99,10 +104,29 @@ def run_query(origin: str, dest: str):
         lf = lf.fetch_blocking()
 
     end = time.monotonic()
+    
+    vmem = psutil.virtual_memory()
+    swmem = psutil.swap_memory()
+    cpu = psutil.cpu_percent(percpu=True)
 
-    print(lf)
-    print(f"Time taken: {end - start}s")
+    print(f"Virtual Memory: {vmem.percent}% used")
+    print(f"Swap Memory: {swmem.percent}% used")
+    print(f"CPU Usages: {cpu}%")
 
+
+    best_flights_output = f"data/output/best_flights_{origin}_{dest}"
+    time_taken_output = "data/output/best_flights_time_taken"
+
+    #The top 20 best flights for this route go into their own file
+    with open(best_flights_output, "w", newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerows(lf.iter_rows())
+        writer.writerow([end - start])
+
+    #Appending the time taken to best_flights_time_taken
+    with open(time_taken_output, "a", newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow((origin, dest, end - start))
 
 if __name__ == "__main__":
     main()
