@@ -8,7 +8,10 @@ import polars as pl
 import argparse
 import csv
 import psutil
+from memory_profiler import profile
 POLARS_MAX_THREADS=1
+
+#@profile
 
 def main():
     pl.Config.set_tbl_rows(20)
@@ -33,8 +36,14 @@ def main():
     run_query(args.origin, args.dest)
 
 
+#def process_memory():
+#    process = psutil.Process(os.getpid())
+#    mem_info = process.memory_info()
+#    return mem_info.rss
+
 def run_query(origin: str, dest: str):
     start = time.monotonic()
+    #mem_before = process_memory()
 
     # A given flight number is not guaranteed to have flown only one route --
     # airlines often reuse flight numbers between different routes. This means
@@ -104,14 +113,17 @@ def run_query(origin: str, dest: str):
         lf = lf.fetch_blocking()
 
     end = time.monotonic()
+    #mem_after = process_memory()
     
-    vmem = psutil.virtual_memory()
-    swmem = psutil.swap_memory()
-    cpu = psutil.cpu_percent(percpu=True)
+    #vmem = psutil.virtual_memory()
+    #swmem = psutil.swap_memory()
+    #cpu = psutil.cpu_percent(percpu=True)
 
-    print(f"Virtual Memory: {vmem.percent}% used")
-    print(f"Swap Memory: {swmem.percent}% used")
-    print(f"CPU Usages: {cpu}%")
+    #print(f"Virtual Memory: {vmem.percent}% used")
+    #print(f"Swap Memory: {swmem.percent}% used")
+    #print(f"CPU Usages: {cpu}%")
+    #print(f"Memory used: {(mem_after - mem_before)}")
+
 
 
     best_flights_output = f"data/output/best_flights_{origin}_{dest}"
