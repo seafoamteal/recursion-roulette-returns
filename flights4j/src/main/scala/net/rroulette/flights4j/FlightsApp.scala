@@ -2,6 +2,7 @@ package net.rroulette.flights4j
 
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.SparkSession
+import java.io.FileWriter
 
 object FlightsApp extends App {
   val (inputFile, origin, dest) = (args(0), args(1), args(2))
@@ -94,6 +95,17 @@ object Runner {
           case (_, averageDelay, _) => averageDelay
         }
 
-        result.take(20).foreach(println)
+        val result = result.take(20)
+
+        val fw = new FileWriter(s"sparkData/${origin}_${dest}_result.csv")
+        try {
+          fw.write("FlightCode,AverageDelay,FlightCount\n")
+          result.foreach {
+            case (flightCode, averageDelay, flightCount) => fw.write(s"$flightCode,$averageDelay,$flightCount\n")
+          }
+        } finally {
+          fw.close()
+        }
+
   }
 }
