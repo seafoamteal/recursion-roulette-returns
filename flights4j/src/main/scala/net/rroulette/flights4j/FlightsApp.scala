@@ -95,12 +95,12 @@ object Runner {
           case (_, averageDelay, _) => averageDelay
         }
 
-        val result = result.take(20)
+        val rows = result.take(20)
 
         val fw = new FileWriter(s"sparkData/${origin}_${dest}_result.csv")
         try {
           fw.write("FlightCode,AverageDelay,FlightCount\n")
-          result.foreach {
+          rows.foreach {
             case (flightCode, averageDelay, flightCount) => fw.write(s"$flightCode,$averageDelay,$flightCount\n")
           }
         } finally {
