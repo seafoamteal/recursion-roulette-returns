@@ -113,18 +113,6 @@ def run_query(origin: str, dest: str):
         lf = lf.fetch_blocking()
 
     end = time.monotonic()
-    #mem_after = process_memory()
-    
-    #vmem = psutil.virtual_memory()
-    #swmem = psutil.swap_memory()
-    #cpu = psutil.cpu_percent(percpu=True)
-
-    #print(f"Virtual Memory: {vmem.percent}% used")
-    #print(f"Swap Memory: {swmem.percent}% used")
-    #print(f"CPU Usages: {cpu}%")
-    #print(f"Memory used: {(mem_after - mem_before)}")
-
-
 
     best_flights_output = f"data/output/best_flights_{origin}_{dest}"
     time_taken_output = "data/output/best_flights_time_taken"
