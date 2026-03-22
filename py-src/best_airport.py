@@ -11,8 +11,6 @@ import psutil
 from memory_profiler import profile
 POLARS_MAX_THREADS=1
 
-#@profile
-
 def main():
     pl.Config.set_tbl_rows(20)
 
@@ -36,14 +34,8 @@ def main():
     run_query(args.origin, args.dest)
 
 
-#def process_memory():
-#    process = psutil.Process(os.getpid())
-#    mem_info = process.memory_info()
-#    return mem_info.rss
-
 def run_query(origin: str, dest: str):
     start = time.monotonic()
-    #mem_before = process_memory()
 
     # A given flight number is not guaranteed to have flown only one route --
     # airlines often reuse flight numbers between different routes. This means
